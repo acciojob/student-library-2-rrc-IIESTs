@@ -10,6 +10,7 @@ import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
+@RequiredArgsConstructor
 public class Author {
 
     @Id
@@ -27,8 +28,7 @@ public class Author {
     @JsonIgnoreProperties("author")
     private List<Book> booksWritten;
 
-    public Author() {
-    }
+
 
 }
 

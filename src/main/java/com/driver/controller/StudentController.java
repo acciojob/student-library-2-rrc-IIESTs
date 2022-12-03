@@ -52,6 +52,8 @@ public class StudentController {
     @DeleteMapping
     public ResponseEntity deleteStudent(@RequestParam("id") int id){
 
+        studentService.deleteStudent(id);
+
         return new ResponseEntity<>("student is deleted", HttpStatus.ACCEPTED);
     }
 

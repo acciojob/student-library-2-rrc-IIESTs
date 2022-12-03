@@ -6,6 +6,8 @@ import com.driver.repositories.StudentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+
 @Service
 public class StudentService {
 
@@ -35,6 +37,7 @@ public class StudentService {
     }
 
     public void updateStudent(Student student){
+
         studentRepository4.updateStudentDetails(student);
     }
 

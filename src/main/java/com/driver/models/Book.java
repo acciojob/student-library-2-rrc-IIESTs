@@ -11,6 +11,7 @@ import java.util.List;
 @Getter
 @Setter
 @AllArgsConstructor
+@RequiredArgsConstructor
 public class Book {
 
     @Id
@@ -40,7 +41,6 @@ public class Book {
     @JsonIgnoreProperties("book")
     private List<Transaction> transactions;
 
-    public Book() {
-    }
+
 }
 

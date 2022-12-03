@@ -10,6 +10,7 @@ import javax.transaction.Transactional;
 @Transactional
 public interface StudentRepository extends JpaRepository<Student, Integer> {
 
+
     @Modifying
     @Query("update Student s set s.emailId = :#{#std.emailId}, " +
             "s.name = :#{#std.name}, " +
