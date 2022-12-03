@@ -12,6 +12,7 @@ import java.util.Date;
 @Getter
 @Setter
 @Builder
+@AllArgsConstructor
 public class Student {
 
     @Id
