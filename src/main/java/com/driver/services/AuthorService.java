@@ -12,7 +12,13 @@ public class AuthorService {
     @Autowired
     AuthorRepository authorRepository1;
 
+
     public void create(Author author){
 
+        authorRepository1.save(author);
+    }
+    public Author getAuthor(Author author){
+        String email = author.getEmail();
+        return authorRepository1.findByEmail(email);
     }
 }
