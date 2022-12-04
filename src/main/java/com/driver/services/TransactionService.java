@@ -48,56 +48,31 @@ public class TransactionService {
         //3. number of books issued against the card is strictly less than max_allowed_books
         // If it fails: throw new Exception("Book limit has reached for this card");
         //If the transaction is successful, save the transaction to the list of transactions and return the id
-        Transaction transaction = Transaction.builder()
-                .transactionId(UUID.randomUUID().toString())
-                .fineAmount(0)
-                .transactionStatus(TransactionStatus.FAILED)
-                .isIssueOperation(false)
-                .build();
-        boolean bookExists = bookRepository5.existsById(bookId);
-        if(!bookExists) {
-            transactionRepository5.save(transaction);
-            throw new Exception("Book is either unavailable or not present");
-        }
-        Book book = bookRepository5.findById(bookId).get();
 
-        if(!book.isAvailable()) {
-            transactionRepository5.save(transaction);
-            throw new Exception("Book is either unavailable or not present");
-        }
-        boolean cardExists = cardRepository5.existsById(cardId);
-        if(!cardExists) {
-            transactionRepository5.save(transaction);
-            throw new Exception("Book is either unavailable or not present");
-        }
+        Book book = bookRepository5.findById(bookId).get();
         Card card = cardRepository5.findById(cardId).get();
-        if(card.getCardStatus()== CardStatus.DEACTIVATED) {
-            transactionRepository5.save(transaction);
+
+        if(book==null || !book.isAvailable()){
+            throw new Exception("Book is either unavailable or not present");
+        }else if(card==null || card.getCardStatus().equals(CardStatus.DEACTIVATED)){
             throw new Exception("Card is invalid");
-        }
-        transaction.setBook(book);
-        transaction.setCard(card);
-        List<Book> booksOnCard = card.getBooks();
-        if(booksOnCard==null) {
-            booksOnCard = new ArrayList<>();
-        }
-        int numberOfBookIssued = booksOnCard.size();
-        if(numberOfBookIssued>=max_allowed_books) {
-            transactionRepository5.save(transaction);
+        }else if(card.getBooks().size()>=max_allowed_books){
             throw new Exception("Book limit has reached for this card");
         }
-            booksOnCard.add(book);
-            card.setBooks(booksOnCard);
-            cardRepository5.save(card);
-            book.setCard(card);
-            book.setAvailable(false);
-            bookRepository5.updateBook(book);
-            transaction.setBook(book);
-            transaction.setCard(card);
-            transaction.setIssueOperation(true);
-            transaction.setTransactionStatus(TransactionStatus.SUCCESSFUL);
-            transactionRepository5.save(transaction);
+        book.setAvailable(false);
+        book.setCard(card);
+        bookRepository5.updateBook(book);
 
+        Transaction transaction = Transaction.builder()
+                .card(card)
+                .transactionId(UUID.randomUUID().toString())
+                .isIssueOperation(true)
+                .fineAmount(0)
+                .book(book)
+                .transactionStatus(TransactionStatus.SUCCESSFUL)
+                .build();
+
+        transactionRepository5.save(transaction);
         //Note that the error message should match exactly in all cases
 
        return transaction.getTransactionId(); //return transactionId instead
