@@ -52,45 +52,46 @@ public class TransactionService {
         Book book = bookRepository5.findById(bookId).get();
         Card card = cardRepository5.findById(cardId).get();
 
-        if(book==null || !book.isAvailable()){
+        if (book == null || !book.isAvailable()) {
             throw new Exception("Book is either unavailable or not present");
-        }else if(card==null || card.getCardStatus().equals(CardStatus.DEACTIVATED)){
+        } else if (card == null || card.getCardStatus().equals(CardStatus.DEACTIVATED)) {
             throw new Exception("Card is invalid");
-        }else if(card.getBooks().size()>=max_allowed_books){
+        } else if (card.getBooks().size() >= max_allowed_books) {
             throw new Exception("Book limit has reached for this card");
+        } else {
+            book.setAvailable(false);
+            book.setCard(card);
+
+            if (card.getBooks() == null) {
+                List<Book> books = new ArrayList<Book>();
+                books.add(book);
+                card.setBooks(books);
+            } else {
+                card.getBooks().add(book);
+            }
+            bookRepository5.updateBook(book);
+
+            Transaction transaction = Transaction.builder()
+                    .card(card)
+                    .transactionId(UUID.randomUUID().toString())
+                    .isIssueOperation(true)
+                    .fineAmount(0)
+                    .book(book)
+                    .transactionStatus(TransactionStatus.SUCCESSFUL)
+                    .build();
+            if (book.getTransactions() == null) {
+                ArrayList<Transaction> t = new ArrayList<Transaction>();
+                t.add(transaction);
+                book.setTransactions(t);
+            } else {
+                book.getTransactions().add(transaction);
+            }
+
+            transactionRepository5.save(transaction);
+            //Note that the error message should match exactly in all cases
+
+            return transaction.getTransactionId(); //return transactionId instead
         }
-        book.setAvailable(false);
-        book.setCard(card);
-
-        if(card.getBooks()==null){
-            List<Book> books = new ArrayList<Book>();
-            books.add(book);
-            card.setBooks(books);
-        }else{
-            card.getBooks().add(book);
-        }
-        bookRepository5.updateBook(book);
-
-        Transaction transaction = Transaction.builder()
-                .card(card)
-                .transactionId(UUID.randomUUID().toString())
-                .isIssueOperation(true)
-                .fineAmount(0)
-                .book(book)
-                .transactionStatus(TransactionStatus.SUCCESSFUL)
-                .build();
-        if(book.getTransactions()==null){
-            ArrayList<Transaction> t = new ArrayList<Transaction>();
-            t.add(transaction);
-            book.setTransactions(t);
-        }else{
-            book.getTransactions().add(transaction);
-        }
-
-        transactionRepository5.save(transaction);
-        //Note that the error message should match exactly in all cases
-
-       return transaction.getTransactionId(); //return transactionId instead
     }
 
     public Transaction returnBook(int cardId, int bookId) throws Exception{
