@@ -61,6 +61,14 @@ public class TransactionService {
         }
         book.setAvailable(false);
         book.setCard(card);
+
+        if(card.getBooks()==null){
+            List<Book> books = new ArrayList<Book>();
+            books.add(book);
+            card.setBooks(books);
+        }else{
+            card.getBooks().add(book);
+        }
         bookRepository5.updateBook(book);
 
         Transaction transaction = Transaction.builder()
@@ -71,6 +79,13 @@ public class TransactionService {
                 .book(book)
                 .transactionStatus(TransactionStatus.SUCCESSFUL)
                 .build();
+        if(book.getTransactions()==null){
+            ArrayList<Transaction> t = new ArrayList<Transaction>();
+            t.add(transaction);
+            book.setTransactions(t);
+        }else{
+            book.getTransactions().add(transaction);
+        }
 
         transactionRepository5.save(transaction);
         //Note that the error message should match exactly in all cases
@@ -100,10 +115,11 @@ public class TransactionService {
                 .build();
         Book book = transaction.getBook();
         book.setCard(null);
+        book.getTransactions().add(transaction);
         book.setAvailable(true);
         bookRepository5.updateBook(book);
         tx.setBook(book);
-        tx.setCard(cardRepository5.findById(cardId).get());
+        tx.setCard(transaction.getCard());
         transactionRepository5.save(tx);
 
         //for the given transaction calculate the fine amount considering the book has been returned exactly when this function is called
